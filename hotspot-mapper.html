@@ -53,7 +53,7 @@
                 </div>
                 <div>
                     <h1 class="font-display text-3xl tracking-tighter">Hotspot Mapper</h1>
-                    <p class="text-zinc-500 text-sm -mt-1">Batch create clickable hotspots for the Navigator</p>
+                    <p class="text-zinc-500 text-sm -mt-1">Batch create clickable hotspots • Filename keys + friendly titles</p>
                 </div>
             </div>
             
@@ -90,7 +90,7 @@
                     </div>
                     
                     <div class="mt-4 pt-4 border-t border-zinc-800">
-                        <p class="text-[10px] text-zinc-500">These screens are available as targets when creating hotspots.</p>
+                        <p class="text-[10px] text-zinc-500">Use filename keys (ac_home, settings_general1, etc.) so they match your actual files.</p>
                     </div>
                 </div>
             </div>
@@ -115,18 +115,18 @@
                     <div id="image-display-area" class="hidden">
                         <div class="image-container mb-4" id="image-container">
                             <img id="preview-image" class="max-w-full cursor-crosshair" onclick="handleImageClick(event)">
-                            <!-- Hotspot markers are added here dynamically -->
                         </div>
                         
-                        <div class="flex items-center gap-x-2 mb-4">
-                            <div class="flex-1">
-                                <label class="text-xs text-zinc-400">Screen Title</label>
-                                <input id="screen-title" type="text" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-3 py-2 text-sm" 
-                                       placeholder="e.g. Boat Apps - Setup & Notifications">
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div>
+                                <label class="text-xs text-zinc-400">Filename Key (matches actual file)</label>
+                                <input id="screen-key" type="text" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-3 py-2 text-sm font-mono" 
+                                       placeholder="e.g. ac_home or settings_general1">
                             </div>
                             <div>
-                                <label class="text-xs text-zinc-400">Screen ID</label>
-                                <input id="screen-id" type="number" class="w-24 bg-zinc-800 border border-zinc-700 rounded-2xl px-3 py-2 text-sm" value="1">
+                                <label class="text-xs text-zinc-400">Display Title</label>
+                                <input id="screen-title" type="text" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-3 py-2 text-sm" 
+                                       placeholder="e.g. Boat Apps - Setup & Notifications">
                             </div>
                         </div>
 
@@ -154,7 +154,7 @@
                     </div>
                     
                     <div class="text-[10px] text-zinc-500">
-                        Click on the image above to add a new hotspot. Markers will appear on the image.
+                        Click on the image to add hotspots. Markers appear on the screenshot.
                     </div>
                 </div>
             </div>
@@ -163,16 +163,11 @@
 
         <!-- Instructions -->
         <div class="mt-8 bg-zinc-900 border border-zinc-800 rounded-3xl p-5 text-sm">
-            <h3 class="font-semibold mb-2">How to use this tool</h3>
-            <ol class="list-decimal list-inside space-y-1 text-zinc-400">
-                <li>Add your known screens on the left (or add them as you map)</li>
-                <li>Upload a screenshot</li>
-                <li>Click anywhere on the image to create a hotspot</li>
-                <li>Choose target screen + label</li>
-                <li>Visual markers will appear on the image showing mapped areas</li>
-                <li>Click a marker on the image to delete it</li>
-                <li>Save when done with that screenshot</li>
-            </ol>
+            <h3 class="font-semibold mb-2">Recommended Naming</h3>
+            <div class="text-xs text-zinc-400 space-y-1">
+                <p><strong>Filename Key</strong> = actual file name without .png (e.g. <code>ac_home</code>, <code>settings_general1</code>)</p>
+                <p><strong>Display Title</strong> = human readable name shown in the navigator and as hotspot labels</p>
+            </div>
         </div>
     </div>
 
@@ -183,15 +178,15 @@
             
             <div class="space-y-4">
                 <div>
-                    <label class="text-xs text-zinc-400">Target Screen</label>
-                    <select id="target-screen" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-3 py-2 text-sm">
+                    <label class="text-xs text-zinc-400">Target Screen (filename key)</label>
+                    <select id="target-key" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-3 py-2 text-sm font-mono">
                     </select>
                 </div>
                 
                 <div>
-                    <label class="text-xs text-zinc-400">Label (shown on hover)</label>
+                    <label class="text-xs text-zinc-400">Hotspot Label (what user sees)</label>
                     <input id="hotspot-label" type="text" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-3 py-2 text-sm" 
-                           placeholder="e.g. Open Settings">
+                           placeholder="e.g. Open Settings or Go to Time Format">
                 </div>
                 
                 <div class="text-xs text-zinc-400">
@@ -213,14 +208,15 @@
     </div>
 
     <script>
+        // Known screens use: key (matches filename) + title (human readable)
         let knownScreens = [
-            { id: 1, title: "Boat Apps - Setup & Notifications" },
-            { id: 2, title: "ActiveCaptain Launch Screen" },
-            { id: 3, title: "Chart View - Main" },
-            { id: 4, title: "Chart Layers Menu" },
-            { id: 5, title: "Chart Menu" },
-            { id: 6, title: "Settings - General (1)" },
-            { id: 7, title: "Settings - General (2) - Scrolled" }
+            { key: "ac_home", title: "Boat Apps - Setup & Notifications" },
+            { key: "ac_splash", title: "ActiveCaptain Launch Screen" },
+            { key: "chart_main", title: "Chart View - Main" },
+            { key: "chart_layers_menu", title: "Chart Layers Menu" },
+            { key: "chart_menu", title: "Chart Menu" },
+            { key: "settings_general1", title: "Settings - General (1)" },
+            { key: "settings_general2", title: "Settings - General (2) - Scrolled" }
         ];
         
         let currentHotspots = [];
@@ -235,11 +231,11 @@
                 const div = document.createElement('div');
                 div.className = 'flex items-center justify-between bg-zinc-800 rounded-2xl px-3 py-2 text-sm';
                 div.innerHTML = `
-                    <div>
-                        <span class="font-mono text-xs text-zinc-400">#${screen.id}</span> 
-                        <span>${screen.title}</span>
+                    <div class="min-w-0">
+                        <div class="font-mono text-xs text-[#00AEEF]">${screen.key}</div>
+                        <div class="truncate">${screen.title}</div>
                     </div>
-                    <button onclick="removeKnownScreen(${screen.id})" class="text-zinc-500 hover:text-red-400">
+                    <button onclick="removeKnownScreen('${screen.key}')" class="text-zinc-500 hover:text-red-400 ml-2 flex-shrink-0">
                         <i class="fa-solid fa-times text-xs"></i>
                     </button>
                 `;
@@ -248,28 +244,29 @@
         }
 
         function addNewScreen() {
-            const id = prompt("Enter new Screen ID (number):");
-            if (!id) return;
-            const title = prompt("Enter screen title:");
+            const key = prompt("Enter Filename Key (e.g. ac_home, settings_general1):");
+            if (!key) return;
+            
+            const title = prompt("Enter Display Title (human readable):");
             if (!title) return;
             
-            knownScreens.push({ id: parseInt(id), title });
+            knownScreens.push({ key: key.trim(), title: title.trim() });
             renderKnownScreens();
         }
 
-        function removeKnownScreen(id) {
-            knownScreens = knownScreens.filter(s => s.id !== id);
+        function removeKnownScreen(key) {
+            knownScreens = knownScreens.filter(s => s.key !== key);
             renderKnownScreens();
         }
 
         function updateTargetSelect() {
-            const select = document.getElementById('target-screen');
+            const select = document.getElementById('target-key');
             select.innerHTML = '';
             
             knownScreens.forEach(screen => {
                 const option = document.createElement('option');
-                option.value = screen.id;
-                option.textContent = `#${screen.id} - ${screen.title}`;
+                option.value = screen.key;
+                option.textContent = `${screen.key} — ${screen.title}`;
                 select.appendChild(option);
             });
         }
@@ -326,7 +323,7 @@
         function confirmAddHotspot() {
             if (!pendingClick) return;
             
-            const targetId = parseInt(document.getElementById('target-screen').value);
+            const targetKey = document.getElementById('target-key').value;
             const label = document.getElementById('hotspot-label').value || "Click here";
             
             const hotspot = {
@@ -334,7 +331,7 @@
                 y: Math.max(0, pendingClick.yPercent - 5),
                 width: 16,
                 height: 10,
-                targetId: targetId,
+                targetKey: targetKey,
                 label: label
             };
             
@@ -362,8 +359,8 @@
             }
             
             currentHotspots.forEach((hotspot, index) => {
-                const targetScreen = knownScreens.find(s => s.id === hotspot.targetId);
-                const targetName = targetScreen ? targetScreen.title : `#${hotspot.targetId}`;
+                const targetScreen = knownScreens.find(s => s.key === hotspot.targetKey);
+                const targetDisplay = targetScreen ? targetScreen.title : hotspot.targetKey;
                 
                 const div = document.createElement('div');
                 div.className = 'bg-zinc-800 rounded-2xl p-3 text-xs';
@@ -371,8 +368,8 @@
                     <div class="flex justify-between items-start">
                         <div>
                             <div class="font-medium">${hotspot.label}</div>
-                            <div class="text-zinc-400">→ ${targetName}</div>
-                            <div class="text-[10px] text-zinc-500 mt-1">
+                            <div class="text-zinc-400">→ ${targetDisplay}</div>
+                            <div class="text-[10px] text-zinc-500 mt-1 font-mono">
                                 ${hotspot.x.toFixed(1)}%, ${hotspot.y.toFixed(1)}%
                             </div>
                         </div>
@@ -393,8 +390,6 @@
 
         function renderHotspotMarkers() {
             const container = document.getElementById('image-container');
-            
-            // Remove existing markers
             container.querySelectorAll('.hotspot-marker').forEach(el => el.remove());
             
             currentHotspots.forEach((hotspot, index) => {
@@ -406,7 +401,6 @@
                 marker.style.height = hotspot.height + '%';
                 marker.title = hotspot.label;
                 
-                // Click marker to delete
                 marker.onclick = (e) => {
                     e.stopImmediatePropagation();
                     if (confirm('Delete this hotspot?')) {
@@ -419,27 +413,33 @@
         }
 
         function saveCurrentScreen() {
-            const title = document.getElementById('screen-title').value || "Untitled Screen";
-            const id = parseInt(document.getElementById('screen-id').value) || Date.now();
+            const key = document.getElementById('screen-key').value.trim();
+            const title = document.getElementById('screen-title').value.trim() || key;
             
-            if (!knownScreens.find(s => s.id === id)) {
-                knownScreens.push({ id, title });
+            if (!key) {
+                alert("Please enter a Filename Key (e.g. ac_home)");
+                return;
+            }
+            
+            // Add to known screens if new
+            if (!knownScreens.find(s => s.key === key)) {
+                knownScreens.push({ key, title });
                 renderKnownScreens();
             }
             
             const screenData = {
-                id: id,
+                key: key,
                 title: title,
-                src: `activecaptain/YOUR_FILENAME_HERE.png`,
+                src: `activecaptain/${key}.png`,
                 hotspots: currentHotspots
             };
             
             let savedScreens = JSON.parse(localStorage.getItem('savedScreens') || '[]');
-            savedScreens = savedScreens.filter(s => s.id !== id);
+            savedScreens = savedScreens.filter(s => s.key !== key);
             savedScreens.push(screenData);
             localStorage.setItem('savedScreens', JSON.stringify(savedScreens));
             
-            alert(`Screen #${id} saved with ${currentHotspots.length} hotspots!`);
+            alert(`Screen "${key}" saved with ${currentHotspots.length} hotspots!`);
             clearCurrentImage();
         }
 
@@ -470,7 +470,7 @@
             URL.revokeObjectURL(url);
             
             navigator.clipboard.writeText(json).then(() => {
-                alert(`Exported ${savedScreens.length} screens to JSON!`);
+                alert(`Exported ${savedScreens.length} screens! JSON downloaded + copied to clipboard.`);
             });
         }
 
@@ -478,13 +478,13 @@
             if (!confirm("Reset everything?")) return;
             localStorage.removeItem('savedScreens');
             knownScreens = [
-                { id: 1, title: "Boat Apps - Setup & Notifications" },
-                { id: 2, title: "ActiveCaptain Launch Screen" },
-                { id: 3, title: "Chart View - Main" },
-                { id: 4, title: "Chart Layers Menu" },
-                { id: 5, title: "Chart Menu" },
-                { id: 6, title: "Settings - General (1)" },
-                { id: 7, title: "Settings - General (2) - Scrolled" }
+                { key: "ac_home", title: "Boat Apps - Setup & Notifications" },
+                { key: "ac_splash", title: "ActiveCaptain Launch Screen" },
+                { key: "chart_main", title: "Chart View - Main" },
+                { key: "chart_layers_menu", title: "Chart Layers Menu" },
+                { key: "chart_menu", title: "Chart Menu" },
+                { key: "settings_general1", title: "Settings - General (1)" },
+                { key: "settings_general2", title: "Settings - General (2) - Scrolled" }
             ];
             renderKnownScreens();
             clearCurrentImage();
@@ -494,7 +494,7 @@
             renderKnownScreens();
             const saved = JSON.parse(localStorage.getItem('savedScreens') || '[]');
             if (saved.length > 0) {
-                console.log(`Loaded ${saved.length} saved screens from browser.`);
+                console.log(`Loaded ${saved.length} previously saved screens.`);
             }
         }
 
