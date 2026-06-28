@@ -23,12 +23,18 @@
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
         }
         
-        .hotspot-preview {
+        .hotspot-marker {
             position: absolute;
             border: 2px solid #00AEEF;
-            background: rgba(0, 174, 239, 0.15);
-            pointer-events: none;
+            background: rgba(0, 174, 239, 0.2);
             border-radius: 4px;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        
+        .hotspot-marker:hover {
+            background: rgba(0, 174, 239, 0.45);
+            border-color: #00d4ff;
         }
         
         .hotspot-list {
@@ -109,6 +115,7 @@
                     <div id="image-display-area" class="hidden">
                         <div class="image-container mb-4" id="image-container">
                             <img id="preview-image" class="max-w-full cursor-crosshair" onclick="handleImageClick(event)">
+                            <!-- Hotspot markers are added here dynamically -->
                         </div>
                         
                         <div class="flex items-center gap-x-2 mb-4">
@@ -147,7 +154,7 @@
                     </div>
                     
                     <div class="text-[10px] text-zinc-500">
-                        Click on the image above to add a new hotspot.
+                        Click on the image above to add a new hotspot. Markers will appear on the image.
                     </div>
                 </div>
             </div>
@@ -158,14 +165,13 @@
         <div class="mt-8 bg-zinc-900 border border-zinc-800 rounded-3xl p-5 text-sm">
             <h3 class="font-semibold mb-2">How to use this tool</h3>
             <ol class="list-decimal list-inside space-y-1 text-zinc-400">
-                <li>Add all your known screens to the left sidebar first (or as you go)</li>
+                <li>Add your known screens on the left (or add them as you map)</li>
                 <li>Upload a screenshot</li>
                 <li>Click anywhere on the image to create a hotspot</li>
-                <li>Choose which screen it should jump to + give it a label</li>
-                <li>Repeat until all hotspots for that image are mapped</li>
-                <li>Click "Save This Screen + Hotspots"</li>
-                <li>Repeat for every screenshot you have</li>
-                <li>When done, click "Export All Screens JSON" and copy into your main navigator</li>
+                <li>Choose target screen + label</li>
+                <li>Visual markers will appear on the image showing mapped areas</li>
+                <li>Click a marker on the image to delete it</li>
+                <li>Save when done with that screenshot</li>
             </ol>
         </div>
     </div>
@@ -179,7 +185,6 @@
                 <div>
                     <label class="text-xs text-zinc-400">Target Screen</label>
                     <select id="target-screen" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-3 py-2 text-sm">
-                        <!-- Populated by JS -->
                     </select>
                 </div>
                 
@@ -219,8 +224,8 @@
         ];
         
         let currentHotspots = [];
-        let currentImageData = null; // { src, width, height }
-        let pendingClick = null; // { xPercent, yPercent }
+        let currentImageData = null;
+        let pendingClick = null;
 
         function renderKnownScreens() {
             const container = document.getElementById('known-screens-list');
@@ -245,7 +250,6 @@
         function addNewScreen() {
             const id = prompt("Enter new Screen ID (number):");
             if (!id) return;
-            
             const title = prompt("Enter screen title:");
             if (!title) return;
             
@@ -283,7 +287,6 @@
                         width: img.width,
                         height: img.height
                     };
-                    
                     showImage();
                 };
                 img.src = e.target.result;
@@ -294,20 +297,20 @@
         function showImage() {
             const uploadArea = document.getElementById('upload-area');
             const displayArea = document.getElementById('image-display-area');
-            const img = document.getElementById('preview-image');
             
             uploadArea.classList.add('hidden');
             displayArea.classList.remove('hidden');
             
+            const img = document.getElementById('preview-image');
             img.src = currentImageData.src;
             
-            // Reset hotspots for new image
             currentHotspots = [];
             renderHotspotsList();
+            renderHotspotMarkers();
         }
 
         function handleImageClick(event) {
-            const img = event.currentTarget || document.getElementById('preview-image');
+            const img = document.getElementById('preview-image');
             const rect = img.getBoundingClientRect();
             
             const x = ((event.clientX - rect.left) / rect.width) * 100;
@@ -315,7 +318,6 @@
             
             pendingClick = { xPercent: x, yPercent: y };
             
-            // Show modal
             document.getElementById('click-position').textContent = `${x.toFixed(1)}%, ${y.toFixed(1)}%`;
             document.getElementById('hotspot-modal').classList.remove('hidden');
             updateTargetSelect();
@@ -327,7 +329,6 @@
             const targetId = parseInt(document.getElementById('target-screen').value);
             const label = document.getElementById('hotspot-label').value || "Click here";
             
-            // For simplicity, we use a fixed size hotspot around the click point
             const hotspot = {
                 x: Math.max(0, pendingClick.xPercent - 8),
                 y: Math.max(0, pendingClick.yPercent - 5),
@@ -339,8 +340,8 @@
             
             currentHotspots.push(hotspot);
             renderHotspotsList();
+            renderHotspotMarkers();
             
-            // Hide modal
             document.getElementById('hotspot-modal').classList.add('hidden');
             pendingClick = null;
             document.getElementById('hotspot-label').value = '';
@@ -372,8 +373,7 @@
                             <div class="font-medium">${hotspot.label}</div>
                             <div class="text-zinc-400">→ ${targetName}</div>
                             <div class="text-[10px] text-zinc-500 mt-1">
-                                ${hotspot.x.toFixed(1)}%, ${hotspot.y.toFixed(1)}% 
-                                (${hotspot.width}×${hotspot.height})
+                                ${hotspot.x.toFixed(1)}%, ${hotspot.y.toFixed(1)}%
                             </div>
                         </div>
                         <button onclick="deleteHotspot(${index})" class="text-red-400 hover:text-red-500">
@@ -388,35 +388,58 @@
         function deleteHotspot(index) {
             currentHotspots.splice(index, 1);
             renderHotspotsList();
+            renderHotspotMarkers();
+        }
+
+        function renderHotspotMarkers() {
+            const container = document.getElementById('image-container');
+            
+            // Remove existing markers
+            container.querySelectorAll('.hotspot-marker').forEach(el => el.remove());
+            
+            currentHotspots.forEach((hotspot, index) => {
+                const marker = document.createElement('div');
+                marker.className = 'hotspot-marker';
+                marker.style.left = hotspot.x + '%';
+                marker.style.top = hotspot.y + '%';
+                marker.style.width = hotspot.width + '%';
+                marker.style.height = hotspot.height + '%';
+                marker.title = hotspot.label;
+                
+                // Click marker to delete
+                marker.onclick = (e) => {
+                    e.stopImmediatePropagation();
+                    if (confirm('Delete this hotspot?')) {
+                        deleteHotspot(index);
+                    }
+                };
+                
+                container.appendChild(marker);
+            });
         }
 
         function saveCurrentScreen() {
             const title = document.getElementById('screen-title').value || "Untitled Screen";
             const id = parseInt(document.getElementById('screen-id').value) || Date.now();
             
-            // Add to known screens if not already there
             if (!knownScreens.find(s => s.id === id)) {
                 knownScreens.push({ id, title });
                 renderKnownScreens();
             }
             
-            // Create screen object
             const screenData = {
                 id: id,
                 title: title,
-                src: `activecaptain/YOUR_FILENAME_HERE.png`, // User will update this
+                src: `activecaptain/YOUR_FILENAME_HERE.png`,
                 hotspots: currentHotspots
             };
             
-            // Store in localStorage for this session
             let savedScreens = JSON.parse(localStorage.getItem('savedScreens') || '[]');
-            savedScreens = savedScreens.filter(s => s.id !== id); // Replace if exists
+            savedScreens = savedScreens.filter(s => s.id !== id);
             savedScreens.push(screenData);
             localStorage.setItem('savedScreens', JSON.stringify(savedScreens));
             
-            alert(`Screen #${id} saved with ${currentHotspots.length} hotspots!\n\nYou can now upload the next screenshot.`);
-            
-            // Reset for next image
+            alert(`Screen #${id} saved with ${currentHotspots.length} hotspots!`);
             clearCurrentImage();
         }
 
@@ -425,21 +448,19 @@
             document.getElementById('image-display-area').classList.add('hidden');
             document.getElementById('preview-image').src = '';
             currentHotspots = [];
-            currentImageData = null;
+            const container = document.getElementById('image-container');
+            container.querySelectorAll('.hotspot-marker').forEach(el => el.remove());
             renderHotspotsList();
         }
 
         function exportAll() {
             const savedScreens = JSON.parse(localStorage.getItem('savedScreens') || '[]');
-            
             if (savedScreens.length === 0) {
                 alert("No screens saved yet!");
                 return;
             }
             
             const json = JSON.stringify(savedScreens, null, 2);
-            
-            // Download as file
             const blob = new Blob([json], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -448,15 +469,13 @@
             a.click();
             URL.revokeObjectURL(url);
             
-            // Also copy to clipboard
             navigator.clipboard.writeText(json).then(() => {
-                alert(`Exported ${savedScreens.length} screens!\n\nJSON has been downloaded and copied to clipboard.`);
+                alert(`Exported ${savedScreens.length} screens to JSON!`);
             });
         }
 
         function resetAll() {
-            if (!confirm("Reset everything? This will clear all saved screens and known screens.")) return;
-            
+            if (!confirm("Reset everything?")) return;
             localStorage.removeItem('savedScreens');
             knownScreens = [
                 { id: 1, title: "Boat Apps - Setup & Notifications" },
@@ -471,14 +490,11 @@
             clearCurrentImage();
         }
 
-        // Initialize
         function init() {
             renderKnownScreens();
-            
-            // Load any previously saved screens from localStorage
             const saved = JSON.parse(localStorage.getItem('savedScreens') || '[]');
             if (saved.length > 0) {
-                console.log(`Loaded ${saved.length} previously saved screens from this browser.`);
+                console.log(`Loaded ${saved.length} saved screens from browser.`);
             }
         }
 
