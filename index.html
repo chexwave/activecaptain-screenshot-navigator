@@ -20,12 +20,54 @@
             background: #000;
             width: 380px;
             height: 720px;
+            position: relative;
         }
 
         .status-bar { background: #000; color: #fff; font-size: 12px; padding: 8px 24px; }
-        .screenshot-container { background: #0a0a0a; height: 620px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .screenshot-container img { max-height: 100%; max-width: 100%; object-fit: contain; }
+        .screenshot-container { 
+            background: #0a0a0a; 
+            height: 620px; 
+            position: relative; 
+            overflow: hidden;
+        }
+        .screenshot-container img { 
+            max-height: 100%; 
+            max-width: 100%; 
+            object-fit: contain; 
+            display: block;
+            margin: 0 auto;
+        }
         
+        .hotspot {
+            position: absolute;
+            border: 2px solid #00AEEF;
+            background: rgba(0, 174, 239, 0.15);
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        .hotspot:hover {
+            background: rgba(0, 174, 239, 0.35);
+            border-color: #00d4ff;
+        }
+        .hotspot-label {
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #00AEEF;
+            color: white;
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .hotspot:hover .hotspot-label {
+            opacity: 1;
+        }
+
         .screen-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .screen-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
 
@@ -51,7 +93,7 @@
                 </div>
                 <div>
                     <h1 class="font-display text-3xl tracking-tighter">ActiveCaptain <span class="text-[#00AEEF]">Screenshot Navigator</span></h1>
-                    <p class="text-zinc-500 text-sm -mt-1">Clickable menu flows • Multi-device ready • v0.4</p>
+                    <p class="text-zinc-500 text-sm -mt-1">Clickable hotspots on real screenshots • v0.5</p>
                 </div>
             </div>
             
@@ -71,7 +113,7 @@
         <div class="mb-6 p-4 bg-emerald-900/30 border border-emerald-700 rounded-2xl text-sm flex items-start gap-x-3">
             <i class="fa-solid fa-check-circle text-emerald-400 mt-0.5"></i>
             <div>
-                <strong>Multi-device ready.</strong> Upload labeled images to <code>activecaptain/</code> folder in the repo. Add new devices as new folders (gpsmap/, fusion/, etc.).
+                <strong>Clickable hotspots active!</strong> Tap areas directly on the screenshots to navigate (try the Settings area in Boat Apps). Add more by editing the hotspots array in the code.
             </div>
         </div>
 
@@ -99,7 +141,7 @@
                             </div>
                         </div>
 
-                        <!-- Screenshot Display -->
+                        <!-- Screenshot Display + Hotspots -->
                         <div class="screenshot-container" id="screenshot-container">
                             <img id="main-screenshot" 
                                  src="activecaptain/ac_home.png" 
@@ -146,7 +188,7 @@
                     <div class="flex items-center justify-between mb-5">
                         <div>
                             <h2 class="font-semibold text-xl tracking-tight">All ActiveCaptain Screens</h2>
-                            <p class="text-zinc-400 text-sm">Quick jump to any labeled screenshot. Bottom nav above simulates the real 3-button bar.</p>
+                            <p class="text-zinc-400 text-sm">Quick jump or tap directly on the image hotspots. Bottom nav simulates the real 3-button bar.</p>
                         </div>
                     </div>
 
@@ -171,23 +213,76 @@
     </div>
 
     <script>
-        // Screen data - ActiveCaptain (images in activecaptain/ folder)
+        // Screen data with hotspots (x, y, width, height in % of image)
         const screens = [
-            { id: 1, title: "Boat Apps • Setup & Notifications", desc: "Main entry point after launch. Perfect for explaining Sync with Plotter, Helm, and My Marine Devices to customers.", src: "activecaptain/ac_home.png", category: "Core" },
-            { id: 2, title: "ActiveCaptain Launch Screen", desc: "Clean Garmin branding screen. This is what customers see when they first open the app.", src: "activecaptain/ac_splash.png", category: "Core" },
+            { 
+                id: 1, 
+                title: "Boat Apps • Setup & Notifications", 
+                desc: "Main entry point after launch. Tap the Settings area on the image to jump there.", 
+                src: "activecaptain/ac_home.png", 
+                category: "Core",
+                hotspots: [
+                    // Approximate position for the Settings area in Boat Apps screenshot
+                    { x: 68, y: 52, width: 28, height: 14, targetId: 6, label: "Go to Settings" }
+                ]
+            },
+            { id: 2, title: "ActiveCaptain Launch Screen", desc: "Clean Garmin branding screen.", src: "activecaptain/ac_splash.png", category: "Core" },
             { id: 3, title: "Chart View • Main", desc: "Live chart with GPS Speed/Heading overlay.", src: "activecaptain/chart_main.png", category: "Chart" },
-            { id: 4, title: "Chart Layers Menu", desc: "Chart type and layer options (Navigation, Fishing, Raster, Relief Shading).", src: "activecaptain/chart_layers_menu.png", category: "Chart" },
-            { id: 5, title: "Chart Menu", desc: "Main chart menu with search, user data, download options.", src: "activecaptain/chart_menu.png", category: "Chart" },
-            { id: 6, title: "Settings • General (1)", desc: "Vessel Settings, Units, Data Usage, Active Track, etc.", src: "activecaptain/settings_general1.png", category: "Settings" },
+            { id: 4, title: "Chart Layers Menu", desc: "Chart type and layer options.", src: "activecaptain/chart_layers_menu.png", category: "Chart" },
+            { id: 5, title: "Chart Menu", desc: "Main chart menu with search and download options.", src: "activecaptain/chart_menu.png", category: "Chart" },
+            { 
+                id: 6, 
+                title: "Settings • General (1)", 
+                desc: "Tap rows to explore deeper settings.", 
+                src: "activecaptain/settings_general1.png", 
+                category: "Settings",
+                hotspots: [
+                    // Example: clicking lower area could go to scrolled view
+                    { x: 10, y: 75, width: 80, height: 20, targetId: 7, label: "Scroll down" }
+                ]
+            },
             { id: 7, title: "Settings • General (2) - Scrolled", desc: "Notification Settings, Keep Screen On, Reconnect options.", src: "activecaptain/settings_general2.png", category: "Settings" }
         ];
 
         let currentScreenId = 1;
 
+        function createHotspots(screen) {
+            const container = document.getElementById('screenshot-container');
+            // Remove old hotspots
+            container.querySelectorAll('.hotspot').forEach(el => el.remove());
+
+            if (!screen.hotspots || screen.hotspots.length === 0) return;
+
+            screen.hotspots.forEach(hotspot => {
+                const div = document.createElement('div');
+                div.className = 'hotspot';
+                div.style.left = hotspot.x + '%';
+                div.style.top = hotspot.y + '%';
+                div.style.width = hotspot.width + '%';
+                div.style.height = hotspot.height + '%';
+
+                // Optional visible label on hover
+                if (hotspot.label) {
+                    const label = document.createElement('div');
+                    label.className = 'hotspot-label';
+                    label.textContent = hotspot.label;
+                    div.appendChild(label);
+                }
+
+                div.onclick = (e) => {
+                    e.stopImmediatePropagation();
+                    loadScreen(hotspot.targetId);
+                };
+
+                container.appendChild(div);
+            });
+        }
+
         function updateBottomNav(activeId) {
-            // Reset all nav buttons
-            document.querySelectorAll('.bottom-nav button').forEach(btn => btn.classList.remove('active', 'text-[#00AEEF]'));
-            document.querySelectorAll('.bottom-nav button').forEach(btn => btn.classList.add('text-zinc-400'));
+            document.querySelectorAll('.bottom-nav button').forEach(btn => {
+                btn.classList.remove('active', 'text-[#00AEEF]');
+                btn.classList.add('text-zinc-400');
+            });
 
             let activeBtn;
             if (activeId === 1) activeBtn = document.getElementById('nav-boatapps');
@@ -199,18 +294,12 @@
                 activeBtn.classList.remove('text-zinc-400');
             }
 
-            // Show/hide Settings scroll note
             const note = document.getElementById('settings-note');
-            if (activeId === 6) {
-                note.classList.remove('hidden');
-            } else {
-                note.classList.add('hidden');
-            }
+            note.classList.toggle('hidden', activeId !== 6);
         }
 
         function loadMainScreen(screenId) {
             loadScreen(screenId);
-            updateBottomNav(screenId);
         }
 
         function loadScreen(screenId) {
@@ -225,6 +314,9 @@
 
             document.getElementById('screen-title').innerHTML = screen.title;
             document.getElementById('screen-desc').innerHTML = screen.desc;
+
+            // Create clickable hotspots
+            createHotspots(screen);
 
             renderScreenGrid();
             updateBottomNav(screenId);
@@ -256,15 +348,14 @@
 
         function resetViewer() {
             loadScreen(1);
-            updateBottomNav(1);
         }
 
         function showTip() {
-            alert("This navigator now has the real bottom navigation bar (Boat Apps / Chart / Settings).\n\nClick the bottom buttons to jump between the 3 main app screens exactly like on the real phone.\n\nUse the cards on the right for quick access to every labeled screenshot (including the scrolled Settings view).\n\nPerfect for showing customers exactly where things live.");
+            alert("New feature: Clickable hotspots!\n\nTry tapping the highlighted area on the Boat Apps screenshot (around the Settings section) to jump directly to Settings.\n\nThis is the beginning of real interactive menu flows. We can add precise hotspots to every screen.");
         }
 
         function addNewDevicePrompt() {
-            alert("To add a new device (e.g. GPSMAP or Fusion):\n1. Create a new folder in the repo (gpsmap/ or fusion/)\n2. Upload your labeled screenshots from Drive into that folder\n3. Tell me the folder name + screen list\n4. I'll add a device selector and wire the bottom nav + flows for that device.");
+            alert("To add hotspots or new devices:\n1. Add new images to a device folder\n2. Add the screen to the JS array with optional 'hotspots' array\n3. Define targetId for each hotspot\n\nExample hotspot: { x: 68, y: 52, width: 28, height: 14, targetId: 6, label: 'Go to Settings' }");
         }
 
         function initViewer() {
@@ -274,7 +365,6 @@
 
             renderScreenGrid();
             loadScreen(1);
-            updateBottomNav(1);
 
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'ArrowRight') {
@@ -290,7 +380,7 @@
                 }
             });
 
-            console.log('%c[ActiveCaptain Navigator] Bottom nav wired to 3 main screens. Multi-device folders supported.', 'color:#64748b');
+            console.log('%c[ActiveCaptain Navigator] Clickable hotspots enabled! Try tapping on Boat Apps image.', 'color:#64748b');
         }
 
         window.onload = initViewer;
