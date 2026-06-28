@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotspot Mapper • ActiveCaptain Navigator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', system_ui, sans-serif; }
+        .font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 600; }
+        
+        .image-container {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+        
+        .hotspot-preview {
+            position: absolute;
+            border: 2px solid #00AEEF;
+            background: rgba(0, 174, 239, 0.15);
+            pointer-events: none;
+            border-radius: 4px;
+        }
+        
+        .hotspot-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200">
+    <div class="max-w-7xl mx-auto p-6">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-x-3">
+                <div class="w-11 h-11 bg-[#00AEEF] rounded-2xl flex items-center justify-center">
+                    <i class="fa-solid fa-crosshairs text-white text-3xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-display text-3xl tracking-tighter">Hotspot Mapper</h1>
+                    <p class="text-zinc-500 text-sm -mt-1">Batch create clickable hotspots for the Navigator</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-x-3">
+                <button onclick="exportAll()" 
+                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium flex items-center gap-x-2">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Export All Screens JSON</span>
+                </button>
+                <button onclick="resetAll()" 
+                        class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-2xl text-sm flex items-center gap-x-2">
+                    <i class="fa-solid fa-trash"></i>
+                    <span>Reset All</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left Sidebar: Known Screens -->
+            <div class="lg:col-span-3">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="font-semibold">Known Screens</h2>
+                        <button onclick="addNewScreen()" 
+                                class="text-xs px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded-xl flex items-center gap-x-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span>Add</span>
+                        </button>
+                    </div>
+                    
+                    <div id="known-screens-list" class="space-y-1 text-sm">
+                        <!-- Populated by JS -->
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-t border-zinc-800">
+                        <p class="text-[10px] text-zinc-500">These screens are available as targets when creating hotspots.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Area -->
+            <div class="lg:col-span-6">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+                    <h2 class="font-semibold mb-4">Current Image</h2>
+                    
+                    <!-- Upload -->
+                    <div id="upload-area" class="border-2 border-dashed border-zinc-700 rounded-2xl p-8 text-center mb-4">
+                        <i class="fa-solid fa-upload text-3xl text-zinc-500 mb-3"></i>
+                        <p class="text-sm">Drop screenshot here or click to upload</p>
+                        <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                        <button onclick="document.getElementById('image-upload').click()" 
+                                class="mt-3 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm">
+                            Choose Image
+                        </button>
+                    </div>
+
+                    <!-- Image Display -->
+                    <div id="image-display-area" class="hidden">
+                        <div class="image-container mb-4" id="image-container">
+                            <img id="preview-image" class="max-w-full cursor-crosshair" onclick="handleImageClick(event)">
+                        </div>
+                        
+                        <div class="flex items-center gap-x-2 mb-4">
+                            <div class="flex-1">
+                                <label class="text-xs text-zinc-400">Screen Title</label>
+                                <input id="screen-title" type="text" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-3 py-2 text-sm" 
+                                       placeholder="e.g. Boat Apps - Setup & Notifications">
+                            </div>
+                            <div>
+                                <label class="text-xs text-zinc-400">Screen ID</label>
+                                <input id="screen-id" type="number" class="w-24 bg-zinc-800 border border-zinc-700 rounded-2xl px-3 py-2 text-sm" value="1">
+                            </div>
+                        </div>
+
+                        <div class="flex gap-x-2">
+                            <button onclick="saveCurrentScreen()" 
+                                    class="flex-1 px-4 py-2 bg-[#00AEEF] hover:bg-[#0099cc] rounded-2xl text-sm font-medium">
+                                Save This Screen + Hotspots
+                            </button>
+                            <button onclick="clearCurrentImage()" 
+                                    class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar: Current Hotspots -->
+            <div class="lg:col-span-3">
+                <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+                    <h2 class="font-semibold mb-4">Hotspots for Current Image</h2>
+                    
+                    <div id="hotspots-list" class="hotspot-list space-y-2 mb-4 text-sm">
+                        <!-- Populated dynamically -->
+                    </div>
+                    
+                    <div class="text-[10px] text-zinc-500">
+                        Click on the image above to add a new hotspot.
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- Instructions -->
+        <div class="mt-8 bg-zinc-900 border border-zinc-800 rounded-3xl p-5 text-sm">
+            <h3 class="font-semibold mb-2">How to use this tool</h3>
+            <ol class="list-decimal list-inside space-y-1 text-zinc-400">
+                <li>Add all your known screens to the left sidebar first (or as you go)</li>
+                <li>Upload a screenshot</li>
+                <li>Click anywhere on the image to create a hotspot</li>
+                <li>Choose which screen it should jump to + give it a label</li>
+                <li>Repeat until all hotspots for that image are mapped</li>
+                <li>Click "Save This Screen + Hotspots"</li>
+                <li>Repeat for every screenshot you have</li>
+                <li>When done, click "Export All Screens JSON" and copy into your main navigator</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Add Hotspot Modal -->
+    <div id="hotspot-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+        <div class="bg-zinc-900 border border-zinc-700 rounded-3xl w-full max-w-md p-6">
+            <h3 class="font-semibold text-lg mb-4">Add Hotspot</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-zinc-400">Target Screen</label>
+                    <select id="target-screen" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-3 py-2 text-sm">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="text-xs text-zinc-400">Label (shown on hover)</label>
+                    <input id="hotspot-label" type="text" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-3 py-2 text-sm" 
+                           placeholder="e.g. Open Settings">
+                </div>
+                
+                <div class="text-xs text-zinc-400">
+                    Position: <span id="click-position"></span>
+                </div>
+            </div>
+            
+            <div class="flex gap-x-3 mt-6">
+                <button onclick="confirmAddHotspot()" 
+                        class="flex-1 px-4 py-2 bg-[#00AEEF] hover:bg-[#0099cc] rounded-2xl text-sm font-medium">
+                    Add Hotspot
+                </button>
+                <button onclick="cancelAddHotspot()" 
+                        class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-2xl text-sm">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let knownScreens = [
+            { id: 1, title: "Boat Apps - Setup & Notifications" },
+            { id: 2, title: "ActiveCaptain Launch Screen" },
+            { id: 3, title: "Chart View - Main" },
+            { id: 4, title: "Chart Layers Menu" },
+            { id: 5, title: "Chart Menu" },
+            { id: 6, title: "Settings - General (1)" },
+            { id: 7, title: "Settings - General (2) - Scrolled" }
+        ];
+        
+        let currentHotspots = [];
+        let currentImageData = null; // { src, width, height }
+        let pendingClick = null; // { xPercent, yPercent }
+
+        function renderKnownScreens() {
+            const container = document.getElementById('known-screens-list');
+            container.innerHTML = '';
+            
+            knownScreens.forEach(screen => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between bg-zinc-800 rounded-2xl px-3 py-2 text-sm';
+                div.innerHTML = `
+                    <div>
+                        <span class="font-mono text-xs text-zinc-400">#${screen.id}</span> 
+                        <span>${screen.title}</span>
+                    </div>
+                    <button onclick="removeKnownScreen(${screen.id})" class="text-zinc-500 hover:text-red-400">
+                        <i class="fa-solid fa-times text-xs"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addNewScreen() {
+            const id = prompt("Enter new Screen ID (number):");
+            if (!id) return;
+            
+            const title = prompt("Enter screen title:");
+            if (!title) return;
+            
+            knownScreens.push({ id: parseInt(id), title });
+            renderKnownScreens();
+        }
+
+        function removeKnownScreen(id) {
+            knownScreens = knownScreens.filter(s => s.id !== id);
+            renderKnownScreens();
+        }
+
+        function updateTargetSelect() {
+            const select = document.getElementById('target-screen');
+            select.innerHTML = '';
+            
+            knownScreens.forEach(screen => {
+                const option = document.createElement('option');
+                option.value = screen.id;
+                option.textContent = `#${screen.id} - ${screen.title}`;
+                select.appendChild(option);
+            });
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    currentImageData = {
+                        src: e.target.result,
+                        width: img.width,
+                        height: img.height
+                    };
+                    
+                    showImage();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function showImage() {
+            const uploadArea = document.getElementById('upload-area');
+            const displayArea = document.getElementById('image-display-area');
+            const img = document.getElementById('preview-image');
+            
+            uploadArea.classList.add('hidden');
+            displayArea.classList.remove('hidden');
+            
+            img.src = currentImageData.src;
+            
+            // Reset hotspots for new image
+            currentHotspots = [];
+            renderHotspotsList();
+        }
+
+        function handleImageClick(event) {
+            const img = event.currentTarget || document.getElementById('preview-image');
+            const rect = img.getBoundingClientRect();
+            
+            const x = ((event.clientX - rect.left) / rect.width) * 100;
+            const y = ((event.clientY - rect.top) / rect.height) * 100;
+            
+            pendingClick = { xPercent: x, yPercent: y };
+            
+            // Show modal
+            document.getElementById('click-position').textContent = `${x.toFixed(1)}%, ${y.toFixed(1)}%`;
+            document.getElementById('hotspot-modal').classList.remove('hidden');
+            updateTargetSelect();
+        }
+
+        function confirmAddHotspot() {
+            if (!pendingClick) return;
+            
+            const targetId = parseInt(document.getElementById('target-screen').value);
+            const label = document.getElementById('hotspot-label').value || "Click here";
+            
+            // For simplicity, we use a fixed size hotspot around the click point
+            const hotspot = {
+                x: Math.max(0, pendingClick.xPercent - 8),
+                y: Math.max(0, pendingClick.yPercent - 5),
+                width: 16,
+                height: 10,
+                targetId: targetId,
+                label: label
+            };
+            
+            currentHotspots.push(hotspot);
+            renderHotspotsList();
+            
+            // Hide modal
+            document.getElementById('hotspot-modal').classList.add('hidden');
+            pendingClick = null;
+            document.getElementById('hotspot-label').value = '';
+        }
+
+        function cancelAddHotspot() {
+            document.getElementById('hotspot-modal').classList.add('hidden');
+            pendingClick = null;
+        }
+
+        function renderHotspotsList() {
+            const container = document.getElementById('hotspots-list');
+            container.innerHTML = '';
+            
+            if (currentHotspots.length === 0) {
+                container.innerHTML = `<p class="text-xs text-zinc-500 italic">No hotspots yet. Click on the image.</p>`;
+                return;
+            }
+            
+            currentHotspots.forEach((hotspot, index) => {
+                const targetScreen = knownScreens.find(s => s.id === hotspot.targetId);
+                const targetName = targetScreen ? targetScreen.title : `#${hotspot.targetId}`;
+                
+                const div = document.createElement('div');
+                div.className = 'bg-zinc-800 rounded-2xl p-3 text-xs';
+                div.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-medium">${hotspot.label}</div>
+                            <div class="text-zinc-400">→ ${targetName}</div>
+                            <div class="text-[10px] text-zinc-500 mt-1">
+                                ${hotspot.x.toFixed(1)}%, ${hotspot.y.toFixed(1)}% 
+                                (${hotspot.width}×${hotspot.height})
+                            </div>
+                        </div>
+                        <button onclick="deleteHotspot(${index})" class="text-red-400 hover:text-red-500">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function deleteHotspot(index) {
+            currentHotspots.splice(index, 1);
+            renderHotspotsList();
+        }
+
+        function saveCurrentScreen() {
+            const title = document.getElementById('screen-title').value || "Untitled Screen";
+            const id = parseInt(document.getElementById('screen-id').value) || Date.now();
+            
+            // Add to known screens if not already there
+            if (!knownScreens.find(s => s.id === id)) {
+                knownScreens.push({ id, title });
+                renderKnownScreens();
+            }
+            
+            // Create screen object
+            const screenData = {
+                id: id,
+                title: title,
+                src: `activecaptain/YOUR_FILENAME_HERE.png`, // User will update this
+                hotspots: currentHotspots
+            };
+            
+            // Store in localStorage for this session
+            let savedScreens = JSON.parse(localStorage.getItem('savedScreens') || '[]');
+            savedScreens = savedScreens.filter(s => s.id !== id); // Replace if exists
+            savedScreens.push(screenData);
+            localStorage.setItem('savedScreens', JSON.stringify(savedScreens));
+            
+            alert(`Screen #${id} saved with ${currentHotspots.length} hotspots!\n\nYou can now upload the next screenshot.`);
+            
+            // Reset for next image
+            clearCurrentImage();
+        }
+
+        function clearCurrentImage() {
+            document.getElementById('upload-area').classList.remove('hidden');
+            document.getElementById('image-display-area').classList.add('hidden');
+            document.getElementById('preview-image').src = '';
+            currentHotspots = [];
+            currentImageData = null;
+            renderHotspotsList();
+        }
+
+        function exportAll() {
+            const savedScreens = JSON.parse(localStorage.getItem('savedScreens') || '[]');
+            
+            if (savedScreens.length === 0) {
+                alert("No screens saved yet!");
+                return;
+            }
+            
+            const json = JSON.stringify(savedScreens, null, 2);
+            
+            // Download as file
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'screens-with-hotspots.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            // Also copy to clipboard
+            navigator.clipboard.writeText(json).then(() => {
+                alert(`Exported ${savedScreens.length} screens!\n\nJSON has been downloaded and copied to clipboard.`);
+            });
+        }
+
+        function resetAll() {
+            if (!confirm("Reset everything? This will clear all saved screens and known screens.")) return;
+            
+            localStorage.removeItem('savedScreens');
+            knownScreens = [
+                { id: 1, title: "Boat Apps - Setup & Notifications" },
+                { id: 2, title: "ActiveCaptain Launch Screen" },
+                { id: 3, title: "Chart View - Main" },
+                { id: 4, title: "Chart Layers Menu" },
+                { id: 5, title: "Chart Menu" },
+                { id: 6, title: "Settings - General (1)" },
+                { id: 7, title: "Settings - General (2) - Scrolled" }
+            ];
+            renderKnownScreens();
+            clearCurrentImage();
+        }
+
+        // Initialize
+        function init() {
+            renderKnownScreens();
+            
+            // Load any previously saved screens from localStorage
+            const saved = JSON.parse(localStorage.getItem('savedScreens') || '[]');
+            if (saved.length > 0) {
+                console.log(`Loaded ${saved.length} previously saved screens from this browser.`);
+            }
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
