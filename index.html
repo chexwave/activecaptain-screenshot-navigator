@@ -28,6 +28,17 @@
         
         .screen-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .screen-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+
+        .bottom-nav {
+            background: #111827;
+            border-top: 1px solid #374151;
+        }
+        .bottom-nav button {
+            transition: all 0.1s ease;
+        }
+        .bottom-nav button.active {
+            color: #00AEEF;
+        }
     </style>
 </head>
 <body class="bg-zinc-950 text-zinc-200">
@@ -40,7 +51,7 @@
                 </div>
                 <div>
                     <h1 class="font-display text-3xl tracking-tighter">ActiveCaptain <span class="text-[#00AEEF]">Screenshot Navigator</span></h1>
-                    <p class="text-zinc-500 text-sm -mt-1">Clickable menu flows • Multi-device ready • v0.3</p>
+                    <p class="text-zinc-500 text-sm -mt-1">Clickable menu flows • Multi-device ready • v0.4</p>
                 </div>
             </div>
             
@@ -60,7 +71,7 @@
         <div class="mb-6 p-4 bg-emerald-900/30 border border-emerald-700 rounded-2xl text-sm flex items-start gap-x-3">
             <i class="fa-solid fa-check-circle text-emerald-400 mt-0.5"></i>
             <div>
-                <strong>Multi-device ready.</strong> Images live in <code>activecaptain/</code> folder. Add new devices as new folders (e.g. <code>gpsmap/</code>, <code>fusion/</code>). The navigator will grow with you.
+                <strong>Multi-device ready.</strong> Upload labeled images to <code>activecaptain/</code> folder in the repo. Add new devices as new folders (gpsmap/, fusion/, etc.).
             </div>
         </div>
 
@@ -95,12 +106,36 @@
                                  alt="ActiveCaptain Screen" 
                                  class="w-full h-full object-contain">
                         </div>
+
+                        <!-- Simulated Bottom Navigation -->
+                        <div class="bottom-nav grid grid-cols-3 text-xs text-center py-2">
+                            <button onclick="loadMainScreen(1)" class="flex flex-col items-center py-1 text-[#00AEEF]" id="nav-boatapps">
+                                <i class="fa-solid fa-ship text-lg mb-0.5"></i>
+                                <span class="text-[10px]">Boat Apps</span>
+                            </button>
+                            <button onclick="loadMainScreen(3)" class="flex flex-col items-center py-1 text-zinc-400 hover:text-zinc-200" id="nav-chart">
+                                <i class="fa-solid fa-map text-lg mb-0.5"></i>
+                                <span class="text-[10px]">Chart</span>
+                            </button>
+                            <button onclick="loadMainScreen(6)" class="flex flex-col items-center py-1 text-zinc-400 hover:text-zinc-200" id="nav-settings">
+                                <i class="fa-solid fa-cog text-lg mb-0.5"></i>
+                                <span class="text-[10px]">Settings</span>
+                            </button>
+                        </div>
                     </div>
                     
                     <!-- Caption -->
                     <div class="mt-4 px-2">
                         <div id="screen-title" class="font-semibold text-lg tracking-tight">Boat Apps • Setup & Notifications</div>
                         <div id="screen-desc" class="text-sm text-zinc-400 mt-1">Main entry point. Use this to walk customers through Sync with Plotter and My Marine Devices.</div>
+                    </div>
+
+                    <!-- Settings scroll note -->
+                    <div id="settings-note" class="hidden mt-2 text-center">
+                        <button onclick="loadMainScreen(7)" class="text-xs px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded-full text-emerald-400 flex items-center gap-x-1 mx-auto">
+                            <i class="fa-solid fa-arrow-down"></i>
+                            <span>Scroll for more Settings</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -110,18 +145,14 @@
                 <div class="marine-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
                     <div class="flex items-center justify-between mb-5">
                         <div>
-                            <h2 class="font-semibold text-xl tracking-tight">ActiveCaptain Screens</h2>
-                            <p class="text-zinc-400 text-sm">Click any card to load the real screenshot. Future: click directly on menu items in the image.</p>
+                            <h2 class="font-semibold text-xl tracking-tight">All ActiveCaptain Screens</h2>
+                            <p class="text-zinc-400 text-sm">Quick jump to any labeled screenshot. Bottom nav above simulates the real 3-button bar.</p>
                         </div>
                     </div>
 
                     <!-- Screen Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="screen-grid">
                         <!-- Populated by JS -->
-                    </div>
-
-                    <div class="mt-6 pt-6 border-t border-zinc-800 text-xs text-zinc-500">
-                        <strong>Pro tip:</strong> When a customer asks about a specific setting, click through the path here to show them the exact screen.
                     </div>
                 </div>
 
@@ -142,58 +173,62 @@
     <script>
         // Screen data - ActiveCaptain (images in activecaptain/ folder)
         const screens = [
-            {
-                id: 1,
-                title: "Boat Apps • Setup & Notifications",
-                desc: "Main entry point after launch. Perfect for explaining Sync with Plotter, Helm, and My Marine Devices to customers.",
-                src: "activecaptain/ac_home.png",
-                category: "Core"
-            },
-            {
-                id: 2,
-                title: "ActiveCaptain Launch Screen",
-                desc: "Clean Garmin branding screen. This is what customers see when they first open the app.",
-                src: "activecaptain/ac_splash.png",
-                category: "Core"
-            },
-            {
-                id: 3,
-                title: "Chart View • Main",
-                desc: "Live chart with GPS Speed/Heading overlay.",
-                src: "activecaptain/chart_main.png",
-                category: "Chart"
-            },
-            {
-                id: 4,
-                title: "Chart Layers Menu",
-                desc: "Chart type and layer options (Navigation, Fishing, Raster, Relief Shading).",
-                src: "activecaptain/chart_layers_menu.png",
-                category: "Chart"
-            },
-            {
-                id: 5,
-                title: "Chart Menu",
-                desc: "Main chart menu with search, user data, download options.",
-                src: "activecaptain/chart_menu.png",
-                category: "Chart"
-            },
-            {
-                id: 6,
-                title: "Settings • General (1)",
-                desc: "Vessel Settings, Units, Data Usage, Active Track, etc.",
-                src: "activecaptain/settings_general1.png",
-                category: "Settings"
-            },
-            {
-                id: 7,
-                title: "Settings • General (2)",
-                desc: "Notification Settings, Keep Screen On, Reconnect options.",
-                src: "activecaptain/settings_general2.png",
-                category: "Settings"
-            }
+            { id: 1, title: "Boat Apps • Setup & Notifications", desc: "Main entry point after launch. Perfect for explaining Sync with Plotter, Helm, and My Marine Devices to customers.", src: "activecaptain/ac_home.png", category: "Core" },
+            { id: 2, title: "ActiveCaptain Launch Screen", desc: "Clean Garmin branding screen. This is what customers see when they first open the app.", src: "activecaptain/ac_splash.png", category: "Core" },
+            { id: 3, title: "Chart View • Main", desc: "Live chart with GPS Speed/Heading overlay.", src: "activecaptain/chart_main.png", category: "Chart" },
+            { id: 4, title: "Chart Layers Menu", desc: "Chart type and layer options (Navigation, Fishing, Raster, Relief Shading).", src: "activecaptain/chart_layers_menu.png", category: "Chart" },
+            { id: 5, title: "Chart Menu", desc: "Main chart menu with search, user data, download options.", src: "activecaptain/chart_menu.png", category: "Chart" },
+            { id: 6, title: "Settings • General (1)", desc: "Vessel Settings, Units, Data Usage, Active Track, etc.", src: "activecaptain/settings_general1.png", category: "Settings" },
+            { id: 7, title: "Settings • General (2) - Scrolled", desc: "Notification Settings, Keep Screen On, Reconnect options.", src: "activecaptain/settings_general2.png", category: "Settings" }
         ];
 
         let currentScreenId = 1;
+
+        function updateBottomNav(activeId) {
+            // Reset all nav buttons
+            document.querySelectorAll('.bottom-nav button').forEach(btn => btn.classList.remove('active', 'text-[#00AEEF]'));
+            document.querySelectorAll('.bottom-nav button').forEach(btn => btn.classList.add('text-zinc-400'));
+
+            let activeBtn;
+            if (activeId === 1) activeBtn = document.getElementById('nav-boatapps');
+            else if (activeId === 3) activeBtn = document.getElementById('nav-chart');
+            else if (activeId === 6 || activeId === 7) activeBtn = document.getElementById('nav-settings');
+
+            if (activeBtn) {
+                activeBtn.classList.add('active', 'text-[#00AEEF]');
+                activeBtn.classList.remove('text-zinc-400');
+            }
+
+            // Show/hide Settings scroll note
+            const note = document.getElementById('settings-note');
+            if (activeId === 6) {
+                note.classList.remove('hidden');
+            } else {
+                note.classList.add('hidden');
+            }
+        }
+
+        function loadMainScreen(screenId) {
+            loadScreen(screenId);
+            updateBottomNav(screenId);
+        }
+
+        function loadScreen(screenId) {
+            const screen = screens.find(s => s.id === screenId);
+            if (!screen) return;
+
+            currentScreenId = screenId;
+
+            const img = document.getElementById('main-screenshot');
+            img.src = screen.src;
+            img.alt = screen.title;
+
+            document.getElementById('screen-title').innerHTML = screen.title;
+            document.getElementById('screen-desc').innerHTML = screen.desc;
+
+            renderScreenGrid();
+            updateBottomNav(screenId);
+        }
 
         function renderScreenGrid() {
             const grid = document.getElementById('screen-grid');
@@ -219,32 +254,17 @@
             });
         }
 
-        function loadScreen(screenId) {
-            const screen = screens.find(s => s.id === screenId);
-            if (!screen) return;
-
-            currentScreenId = screenId;
-
-            const img = document.getElementById('main-screenshot');
-            img.src = screen.src;
-            img.alt = screen.title;
-
-            document.getElementById('screen-title').innerHTML = screen.title;
-            document.getElementById('screen-desc').innerHTML = screen.desc;
-
-            renderScreenGrid();
-        }
-
         function resetViewer() {
             loadScreen(1);
+            updateBottomNav(1);
         }
 
         function showTip() {
-            alert("Use this to quickly show customers or techs exactly where a setting or button lives.\n\nExample: Customer asks about time format? Click through Settings cards to show the exact screen.\n\nFuture versions will let you click the actual menu items on the screenshot image itself.");
+            alert("This navigator now has the real bottom navigation bar (Boat Apps / Chart / Settings).\n\nClick the bottom buttons to jump between the 3 main app screens exactly like on the real phone.\n\nUse the cards on the right for quick access to every labeled screenshot (including the scrolled Settings view).\n\nPerfect for showing customers exactly where things live.");
         }
 
         function addNewDevicePrompt() {
-            alert("To add a new device:\n1. Create a folder in the repo (e.g. gpsmap/)\n2. Upload labeled screenshots from your Drive\n3. Tell me the folder name and list of screens\n4. I'll add a device tab and wire the flows.");
+            alert("To add a new device (e.g. GPSMAP or Fusion):\n1. Create a new folder in the repo (gpsmap/ or fusion/)\n2. Upload your labeled screenshots from Drive into that folder\n3. Tell me the folder name + screen list\n4. I'll add a device selector and wire the bottom nav + flows for that device.");
         }
 
         function initViewer() {
@@ -254,6 +274,7 @@
 
             renderScreenGrid();
             loadScreen(1);
+            updateBottomNav(1);
 
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'ArrowRight') {
@@ -269,7 +290,7 @@
                 }
             });
 
-            console.log('%c[ActiveCaptain Navigator] Multi-device folder structure ready. Upload labeled images to activecaptain/ folder.', 'color:#64748b');
+            console.log('%c[ActiveCaptain Navigator] Bottom nav wired to 3 main screens. Multi-device folders supported.', 'color:#64748b');
         }
 
         window.onload = initViewer;
