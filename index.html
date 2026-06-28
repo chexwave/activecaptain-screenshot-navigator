@@ -94,7 +94,7 @@
                 </div>
                 <div>
                     <h1 class="font-display text-3xl tracking-tighter">ActiveCaptain <span class="text-[#00AEEF]">Screenshot Navigator</span></h1>
-                    <p class="text-zinc-500 text-sm -mt-1">Clickable hotspots on real screenshots • v0.6</p>
+                    <p class="text-zinc-500 text-sm -mt-1">Clickable hotspots • Key-based structure • v0.7</p>
                 </div>
             </div>
             
@@ -114,7 +114,7 @@
         <div class="mb-6 p-4 bg-emerald-900/30 border border-emerald-700 rounded-2xl text-sm flex items-start gap-x-3">
             <i class="fa-solid fa-check-circle text-emerald-400 mt-0.5"></i>
             <div>
-                <strong>Hotspots refined!</strong> The clickable area on Boat Apps is now better aligned with the Settings section. Tap it to jump directly.
+                <strong>Key-based structure active.</strong> Hotspots now use filename keys (ac_home, settings_general1, etc.) for easier maintenance and batch mapping.
             </div>
         </div>
 
@@ -152,15 +152,15 @@
 
                         <!-- Simulated Bottom Navigation -->
                         <div class="bottom-nav grid grid-cols-3 text-xs text-center py-2">
-                            <button onclick="loadMainScreen(1)" class="flex flex-col items-center py-1 text-[#00AEEF]" id="nav-boatapps">
+                            <button onclick="loadMainScreen('ac_home')" class="flex flex-col items-center py-1 text-[#00AEEF]" id="nav-boatapps">
                                 <i class="fa-solid fa-ship text-lg mb-0.5"></i>
                                 <span class="text-[10px]">Boat Apps</span>
                             </button>
-                            <button onclick="loadMainScreen(3)" class="flex flex-col items-center py-1 text-zinc-400 hover:text-zinc-200" id="nav-chart">
+                            <button onclick="loadMainScreen('chart_main')" class="flex flex-col items-center py-1 text-zinc-400 hover:text-zinc-200" id="nav-chart">
                                 <i class="fa-solid fa-map text-lg mb-0.5"></i>
                                 <span class="text-[10px]">Chart</span>
                             </button>
-                            <button onclick="loadMainScreen(6)" class="flex flex-col items-center py-1 text-zinc-400 hover:text-zinc-200" id="nav-settings">
+                            <button onclick="loadMainScreen('settings_general1')" class="flex flex-col items-center py-1 text-zinc-400 hover:text-zinc-200" id="nav-settings">
                                 <i class="fa-solid fa-cog text-lg mb-0.5"></i>
                                 <span class="text-[10px]">Settings</span>
                             </button>
@@ -170,12 +170,12 @@
                     <!-- Caption -->
                     <div class="mt-4 px-2">
                         <div id="screen-title" class="font-semibold text-lg tracking-tight">Boat Apps • Setup & Notifications</div>
-                        <div id="screen-desc" class="text-sm text-zinc-400 mt-1">Main entry point. Use this to walk customers through Sync with Plotter and My Marine Devices.</div>
+                        <div id="screen-desc" class="text-sm text-zinc-400 mt-1">Main entry point. Tap the highlighted area to jump to Settings.</div>
                     </div>
 
                     <!-- Settings scroll note -->
                     <div id="settings-note" class="hidden mt-2 text-center">
-                        <button onclick="loadMainScreen(7)" class="text-xs px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded-full text-emerald-400 flex items-center gap-x-1 mx-auto">
+                        <button onclick="loadMainScreen('settings_general2')" class="text-xs px-3 py-1 bg-zinc-800 hover:bg-zinc-700 rounded-full text-emerald-400 flex items-center gap-x-1 mx-auto">
                             <i class="fa-solid fa-arrow-down"></i>
                             <span>Scroll for more Settings</span>
                         </button>
@@ -214,37 +214,36 @@
     </div>
 
     <script>
-        // Refined hotspots - coordinates in % of the image area
+        // Screens now use 'key' (matches filename) instead of numeric id
         const screens = [
             { 
-                id: 1, 
+                key: "ac_home", 
                 title: "Boat Apps • Setup & Notifications", 
-                desc: "Tap the highlighted area to jump to Settings. (Hotspot refined for better accuracy)", 
+                desc: "Tap the highlighted area to jump to Settings.", 
                 src: "activecaptain/ac_home.png", 
                 category: "Core",
                 hotspots: [
-                    // Refined: Better centered on the interactive Settings-related area in the screenshot
-                    { x: 55, y: 48, width: 40, height: 22, targetId: 6, label: "Go to Settings" }
+                    { x: 55, y: 48, width: 40, height: 22, targetKey: "settings_general1", label: "Go to Settings" }
                 ]
             },
-            { id: 2, title: "ActiveCaptain Launch Screen", desc: "Clean Garmin branding screen.", src: "activecaptain/ac_splash.png", category: "Core" },
-            { id: 3, title: "Chart View • Main", desc: "Live chart with GPS Speed/Heading overlay.", src: "activecaptain/chart_main.png", category: "Chart" },
-            { id: 4, title: "Chart Layers Menu", desc: "Chart type and layer options.", src: "activecaptain/chart_layers_menu.png", category: "Chart" },
-            { id: 5, title: "Chart Menu", desc: "Main chart menu with search and download options.", src: "activecaptain/chart_menu.png", category: "Chart" },
+            { key: "ac_splash", title: "ActiveCaptain Launch Screen", desc: "Clean Garmin branding screen.", src: "activecaptain/ac_splash.png", category: "Core" },
+            { key: "chart_main", title: "Chart View • Main", desc: "Live chart with GPS Speed/Heading overlay.", src: "activecaptain/chart_main.png", category: "Chart" },
+            { key: "chart_layers_menu", title: "Chart Layers Menu", desc: "Chart type and layer options.", src: "activecaptain/chart_layers_menu.png", category: "Chart" },
+            { key: "chart_menu", title: "Chart Menu", desc: "Main chart menu with search and download options.", src: "activecaptain/chart_menu.png", category: "Chart" },
             { 
-                id: 6, 
+                key: "settings_general1", 
                 title: "Settings • General (1)", 
                 desc: "Tap rows to explore deeper settings.", 
                 src: "activecaptain/settings_general1.png", 
                 category: "Settings",
                 hotspots: [
-                    { x: 15, y: 70, width: 70, height: 22, targetId: 7, label: "Scroll for more" }
+                    { x: 15, y: 70, width: 70, height: 22, targetKey: "settings_general2", label: "Scroll for more" }
                 ]
             },
-            { id: 7, title: "Settings • General (2) - Scrolled", desc: "Notification Settings, Keep Screen On, Reconnect options.", src: "activecaptain/settings_general2.png", category: "Settings" }
+            { key: "settings_general2", title: "Settings • General (2) - Scrolled", desc: "Notification Settings, Keep Screen On, Reconnect options.", src: "activecaptain/settings_general2.png", category: "Settings" }
         ];
 
-        let currentScreenId = 1;
+        let currentScreenKey = "ac_home";
 
         function createHotspots(screen) {
             const container = document.getElementById('screenshot-container');
@@ -269,23 +268,23 @@
 
                 div.onclick = (e) => {
                     e.stopImmediatePropagation();
-                    loadScreen(hotspot.targetId);
+                    loadScreen(hotspot.targetKey);
                 };
 
                 container.appendChild(div);
             });
         }
 
-        function updateBottomNav(activeId) {
+        function updateBottomNav(activeKey) {
             document.querySelectorAll('.bottom-nav button').forEach(btn => {
                 btn.classList.remove('active', 'text-[#00AEEF]');
                 btn.classList.add('text-zinc-400');
             });
 
             let activeBtn;
-            if (activeId === 1) activeBtn = document.getElementById('nav-boatapps');
-            else if (activeId === 3) activeBtn = document.getElementById('nav-chart');
-            else if (activeId === 6 || activeId === 7) activeBtn = document.getElementById('nav-settings');
+            if (activeKey === 'ac_home') activeBtn = document.getElementById('nav-boatapps');
+            else if (activeKey === 'chart_main') activeBtn = document.getElementById('nav-chart');
+            else if (activeKey === 'settings_general1' || activeKey === 'settings_general2') activeBtn = document.getElementById('nav-settings');
 
             if (activeBtn) {
                 activeBtn.classList.add('active', 'text-[#00AEEF]');
@@ -293,18 +292,18 @@
             }
 
             const note = document.getElementById('settings-note');
-            note.classList.toggle('hidden', activeId !== 6);
+            note.classList.toggle('hidden', activeKey !== 'settings_general1');
         }
 
-        function loadMainScreen(screenId) {
-            loadScreen(screenId);
+        function loadMainScreen(screenKey) {
+            loadScreen(screenKey);
         }
 
-        function loadScreen(screenId) {
-            const screen = screens.find(s => s.id === screenId);
+        function loadScreen(screenKey) {
+            const screen = screens.find(s => s.key === screenKey);
             if (!screen) return;
 
-            currentScreenId = screenId;
+            currentScreenKey = screenKey;
 
             const img = document.getElementById('main-screenshot');
             img.src = screen.src;
@@ -315,7 +314,7 @@
 
             createHotspots(screen);
             renderScreenGrid();
-            updateBottomNav(screenId);
+            updateBottomNav(screenKey);
         }
 
         function renderScreenGrid() {
@@ -324,7 +323,7 @@
 
             screens.forEach(screen => {
                 const card = document.createElement('div');
-                card.className = `screen-card cursor-pointer bg-zinc-800 border border-zinc-700 hover:border-[#00AEEF] rounded-2xl p-4 flex gap-x-4 items-start ${currentScreenId === screen.id ? 'border-[#00AEEF]' : ''}`;
+                card.className = `screen-card cursor-pointer bg-zinc-800 border border-zinc-700 hover:border-[#00AEEF] rounded-2xl p-4 flex gap-x-4 items-start ${currentScreenKey === screen.key ? 'border-[#00AEEF]' : ''}`;
                 
                 card.innerHTML = `
                     <div class="flex-1 min-w-0">
@@ -337,21 +336,21 @@
                     <i class="fa-solid fa-chevron-right text-zinc-500 mt-1"></i>
                 `;
                 
-                card.onclick = () => loadScreen(screen.id);
+                card.onclick = () => loadScreen(screen.key);
                 grid.appendChild(card);
             });
         }
 
         function resetViewer() {
-            loadScreen(1);
+            loadScreen('ac_home');
         }
 
         function showTip() {
-            alert("Hotspots refined!\n\nThe clickable area on Boat Apps is now better positioned over the interactive section.\n\nTap the highlighted box to jump to Settings. We can add more precise hotspots to every screen.");
+            alert("Hotspot system now uses filename keys (ac_home, settings_general1, etc.).\n\nThis makes batch mapping with the Hotspot Mapper tool much easier and consistent.\n\nTap the blue highlighted areas on the image to navigate.");
         }
 
         function addNewDevicePrompt() {
-            alert("To add or refine hotspots:\nEdit the 'hotspots' array for any screen.\nCoordinates are percentages of the image (x, y, width, height).\nExample: { x: 55, y: 48, width: 40, height: 22, targetId: 6 }\n\nTest on the live site and tell me if you want further adjustments.");
+            alert("To add a new device:\n1. Add screenshots to a new folder (e.g. gpsmap/)\n2. Use the Hotspot Mapper tool to create hotspots with proper keys\n3. Export the JSON and merge into the screens array\n\nThe key-based system makes scaling much cleaner.");
         }
 
         function initViewer() {
@@ -360,23 +359,24 @@
             timeEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
             renderScreenGrid();
-            loadScreen(1);
+            loadScreen('ac_home');
 
             document.addEventListener('keydown', function(e) {
+                const currentIndex = screens.findIndex(s => s.key === currentScreenKey);
                 if (e.key === 'ArrowRight') {
-                    const next = currentScreenId < screens.length ? currentScreenId + 1 : 1;
-                    loadScreen(next);
+                    const nextIndex = (currentIndex + 1) % screens.length;
+                    loadScreen(screens[nextIndex].key);
                 }
                 if (e.key === 'ArrowLeft') {
-                    const prev = currentScreenId > 1 ? currentScreenId - 1 : screens.length;
-                    loadScreen(prev);
+                    const prevIndex = (currentIndex - 1 + screens.length) % screens.length;
+                    loadScreen(screens[prevIndex].key);
                 }
                 if (e.key.toLowerCase() === 'r') {
                     resetViewer();
                 }
             });
 
-            console.log('%c[ActiveCaptain Navigator] Hotspot coordinates refined. Test the improved area on Boat Apps.', 'color:#64748b');
+            console.log('%c[ActiveCaptain Navigator] Now using key-based structure (ac_home, settings_general1, etc.).', 'color:#64748b');
         }
 
         window.onload = initViewer;
