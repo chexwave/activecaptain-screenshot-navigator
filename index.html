@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ActiveCaptain Screenshot Viewer • ChexWave</title>
+    <title>ActiveCaptain Screenshot Navigator • ChexWave</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -40,14 +40,14 @@
                 </div>
                 <div>
                     <h1 class="font-display text-3xl tracking-tighter">ActiveCaptain <span class="text-[#00AEEF]">Screenshot Navigator</span></h1>
-                    <p class="text-zinc-500 text-sm -mt-1">Clickable menu flows for training & customer support • v0.2</p>
+                    <p class="text-zinc-500 text-sm -mt-1">Clickable menu flows • Multi-device ready • v0.3</p>
                 </div>
             </div>
             
             <div class="flex items-center gap-x-3">
                 <div class="px-4 py-2 bg-zinc-900 rounded-2xl text-sm flex items-center gap-x-2 border border-zinc-800">
                     <i class="fa-solid fa-check-double text-emerald-400"></i>
-                    <span class="text-emerald-400 font-medium">6 Real Screens</span>
+                    <span class="text-emerald-400 font-medium">ActiveCaptain</span>
                 </div>
                 <button onclick="resetViewer()" class="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-2xl text-sm flex items-center gap-x-2 transition-colors">
                     <i class="fa-solid fa-redo mr-1.5"></i>
@@ -56,12 +56,11 @@
             </div>
         </div>
 
-        <!-- Setup Banner for GitHub -->
-        <div class="mb-6 p-4 bg-amber-900/30 border border-amber-700 rounded-2xl text-sm flex items-start gap-x-3">
-            <i class="fa-solid fa-exclamation-triangle text-amber-400 mt-0.5"></i>
+        <!-- Setup Banner -->
+        <div class="mb-6 p-4 bg-emerald-900/30 border border-emerald-700 rounded-2xl text-sm flex items-start gap-x-3">
+            <i class="fa-solid fa-check-circle text-emerald-400 mt-0.5"></i>
             <div>
-                <strong class="text-amber-400">Setup:</strong> 
-                This is hosted on GitHub. For local use, put this HTML + the 6 PNG files in the same folder. On GitHub Pages it will work once images are added to the repo.
+                <strong>Multi-device ready.</strong> Images live in <code>activecaptain/</code> folder. Add new devices as new folders (e.g. <code>gpsmap/</code>, <code>fusion/</code>). The navigator will grow with you.
             </div>
         </div>
 
@@ -92,7 +91,7 @@
                         <!-- Screenshot Display -->
                         <div class="screenshot-container" id="screenshot-container">
                             <img id="main-screenshot" 
-                                 src="1000054580.png" 
+                                 src="activecaptain/ac_home.png" 
                                  alt="ActiveCaptain Screen" 
                                  class="w-full h-full object-contain">
                         </div>
@@ -111,8 +110,8 @@
                 <div class="marine-card bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
                     <div class="flex items-center justify-between mb-5">
                         <div>
-                            <h2 class="font-semibold text-xl tracking-tight">Pick a Screen</h2>
-                            <p class="text-zinc-400 text-sm">Click any card to load it in the phone frame. Later we can add real clickable zones on the images.</p>
+                            <h2 class="font-semibold text-xl tracking-tight">ActiveCaptain Screens</h2>
+                            <p class="text-zinc-400 text-sm">Click any card to load the real screenshot. Future: click directly on menu items in the image.</p>
                         </div>
                     </div>
 
@@ -121,21 +120,19 @@
                         <!-- Populated by JS -->
                     </div>
 
-                    <div class="mt-6 pt-6 border-t border-zinc-800 text-xs text-zinc-500 flex items-center gap-x-2">
-                        <i class="fa-solid fa-lightbulb text-amber-400"></i>
-                        <span>Future: Click directly on menu items in the screenshot to advance the flow (e.g. Settings → Time & Date → Time Format).</span>
+                    <div class="mt-6 pt-6 border-t border-zinc-800 text-xs text-zinc-500">
+                        <strong>Pro tip:</strong> When a customer asks about a specific setting, click through the path here to show them the exact screen.
                     </div>
                 </div>
 
-                <!-- Quick Tips -->
                 <div class="mt-4 flex flex-wrap gap-2">
                     <div onclick="showTip()" class="cursor-pointer px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-2xl text-sm flex items-center gap-x-2 transition-all">
                         <i class="fa-solid fa-question-circle"></i>
-                        <span>Why this exists</span>
+                        <span>How to use for training</span>
                     </div>
-                    <div onclick="addNewScreenPrompt()" class="cursor-pointer px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-2xl text-sm flex items-center gap-x-2 transition-all">
+                    <div onclick="addNewDevicePrompt()" class="cursor-pointer px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-2xl text-sm flex items-center gap-x-2 transition-all">
                         <i class="fa-solid fa-plus"></i>
-                        <span>Add new screenshot / flow</span>
+                        <span>Add new device / flow</span>
                     </div>
                 </div>
             </div>
@@ -143,49 +140,56 @@
     </div>
 
     <script>
-        // Screen data - easy to expand
+        // Screen data - ActiveCaptain (images in activecaptain/ folder)
         const screens = [
             {
                 id: 1,
                 title: "Boat Apps • Setup & Notifications",
                 desc: "Main entry point after launch. Perfect for explaining Sync with Plotter, Helm, and My Marine Devices to customers.",
-                src: "1000054580.png",
+                src: "activecaptain/ac_home.png",
                 category: "Core"
             },
             {
                 id: 2,
                 title: "ActiveCaptain Launch Screen",
                 desc: "Clean Garmin branding screen. This is what customers see when they first open the app.",
-                src: "1000054582.png",
+                src: "activecaptain/ac_splash.png",
                 category: "Core"
             },
             {
                 id: 3,
-                title: "Chart View • Overview",
-                desc: "Live chart with GPS Speed/Heading overlay. Great reference for explaining the map interface.",
-                src: "1000054585.png",
+                title: "Chart View • Main",
+                desc: "Live chart with GPS Speed/Heading overlay.",
+                src: "activecaptain/chart_main.png",
                 category: "Chart"
             },
             {
                 id: 4,
-                title: "Settings • General",
-                desc: "Vessel Settings, Units, Notifications, Keep Screen On toggle. Use this when walking through preferences.",
-                src: "1000054586.png",
-                category: "Settings"
+                title: "Chart Layers Menu",
+                desc: "Chart type and layer options (Navigation, Fishing, Raster, Relief Shading).",
+                src: "activecaptain/chart_layers_menu.png",
+                category: "Chart"
             },
             {
                 id: 5,
-                title: "Settings • Account & Notifications",
-                desc: "Notification Settings, Reconnect toggle, Account management. Handy for troubleshooting sync issues.",
-                src: "1000054589.png",
-                category: "Settings"
+                title: "Chart Menu",
+                desc: "Main chart menu with search, user data, download options.",
+                src: "activecaptain/chart_menu.png",
+                category: "Chart"
             },
             {
                 id: 6,
-                title: "Chart View • Relief Shading Menu",
-                desc: "Chart type selector open (Navigation / Fishing / Raster / Relief Shading). Shows how to change map style.",
-                src: "1000054587.png",
-                category: "Chart"
+                title: "Settings • General (1)",
+                desc: "Vessel Settings, Units, Data Usage, Active Track, etc.",
+                src: "activecaptain/settings_general1.png",
+                category: "Settings"
+            },
+            {
+                id: 7,
+                title: "Settings • General (2)",
+                desc: "Notification Settings, Keep Screen On, Reconnect options.",
+                src: "activecaptain/settings_general2.png",
+                category: "Settings"
             }
         ];
 
@@ -221,16 +225,13 @@
 
             currentScreenId = screenId;
 
-            // Update image
             const img = document.getElementById('main-screenshot');
             img.src = screen.src;
             img.alt = screen.title;
 
-            // Update title and description
             document.getElementById('screen-title').innerHTML = screen.title;
             document.getElementById('screen-desc').innerHTML = screen.desc;
 
-            // Refresh grid to show active state
             renderScreenGrid();
         }
 
@@ -239,29 +240,21 @@
         }
 
         function showTip() {
-            alert("This navigator exists so you can quickly show a customer or tech exactly where a button or setting lives — without digging through the real app or describing it over the phone. Click the cards to jump to any screen. Future versions will let you click directly on the screenshot itself (e.g. tap 'Settings' in Boat Apps to go there).\n\nPerfect for 'how do I change the time format?' walkthroughs.");
+            alert("Use this to quickly show customers or techs exactly where a setting or button lives.\n\nExample: Customer asks about time format? Click through Settings cards to show the exact screen.\n\nFuture versions will let you click the actual menu items on the screenshot image itself.");
         }
 
-        function addNewScreenPrompt() {
-            const name = prompt("Screen or flow name (e.g. 'Settings > Time Format'):");
-            if (!name) return;
-            
-            alert(`Got it! Drop the new screenshot PNG in the repo (or same folder) and tell me the filename + which screen it follows. I'll wire it into the navigator.`);
+        function addNewDevicePrompt() {
+            alert("To add a new device:\n1. Create a folder in the repo (e.g. gpsmap/)\n2. Upload labeled screenshots from your Drive\n3. Tell me the folder name and list of screens\n4. I'll add a device tab and wire the flows.");
         }
 
         function initViewer() {
-            // Set initial time
             const timeEl = document.getElementById('time');
             const now = new Date();
             timeEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            // Render grid
             renderScreenGrid();
-
-            // Load first screen
             loadScreen(1);
 
-            // Keyboard support
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'ArrowRight') {
                     const next = currentScreenId < screens.length ? currentScreenId + 1 : 1;
@@ -276,7 +269,7 @@
                 }
             });
 
-            console.log('%c[ActiveCaptain Navigator] Repo version ready. Click cards to navigate screens. Expandable for full menu flows.', 'color:#64748b');
+            console.log('%c[ActiveCaptain Navigator] Multi-device folder structure ready. Upload labeled images to activecaptain/ folder.', 'color:#64748b');
         }
 
         window.onload = initViewer;
